@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>光伏系统分类与识别 · 课堂游戏</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%230D1326'/><text x='50' y='68' font-size='40' text-anchor='middle' fill='%2360A5FA' font-family='Arial' font-weight='bold'>CL</text></svg>">
+<style>
+  :root{--bg:#0D1326;--card:#151D33;--card2:#1B2440;--line:#2A3656;--blue:#2563EB;--blue-l:#60A5FA;
+    --ink:#F2F4F8;--muted:#94A3B8;--ok:#22C55E;--bad:#EF4444;--warn:#F59E0B;}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:radial-gradient(1100px 650px at 75% -10%,#1B2A55 0%,var(--bg) 55%);
+    color:var(--ink);min-height:100vh;font-family:"Microsoft YaHei","PingFang SC","Noto Sans SC",system-ui,sans-serif;}
+  #app{max-width:1000px;margin:0 auto;padding:24px 20px 60px;}
+  button{font-family:inherit;cursor:pointer;border:none;border-radius:10px;transition:.15s;}
+  .tag{display:inline-block;font-size:12px;letter-spacing:.14em;color:var(--blue-l);
+    border:1px solid var(--line);padding:3px 12px;border-radius:999px;}
+  .hud{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;
+    background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 18px;}
+  .hud .stat{text-align:center;}
+  .hud .stat .v{font-size:22px;font-weight:800;color:var(--blue-l);}
+  .hud .stat .l{font-size:11px;color:var(--muted);letter-spacing:.1em;}
+  .center{text-align:center;padding-top:6vh;}
+  .center h1{font-size:42px;margin:16px 0 10px;}
+  .center h1 .hi{color:var(--blue-l);}
+  .center p{color:var(--muted);font-size:16px;max-width:620px;margin:0 auto;}
+  .rules{margin:26px auto 0;max-width:620px;text-align:left;background:var(--card);
+    border:1px solid var(--line);border-radius:14px;padding:18px 22px;font-size:14px;color:var(--muted);}
+  .rules b{color:var(--ink);}
+  .big{margin-top:26px;background:var(--blue);color:#fff;font-size:19px;font-weight:700;padding:13px 42px;}
+
+  .scene{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:20px 24px;margin-bottom:16px;}
+  .scene h2{font-size:19px;margin-bottom:6px;}
+  .scene p{color:var(--muted);font-size:14.5px;}
+  .opts{display:flex;flex-wrap:wrap;gap:10px;margin-top:14px;}
+  .opt{background:var(--card2);border:1px solid var(--line);color:var(--ink);
+    border-radius:999px;padding:9px 16px;font-size:14px;}
+  .opt:hover{border-color:var(--blue-l);}
+  .opt.picked{border:2px solid var(--warn);background:rgba(245,158,11,.15);color:var(--warn);font-weight:700;}
+  .opt.right{border-color:var(--ok);background:rgba(34,197,94,.15);color:#86EFAC;}
+  .opt.wrong{border-color:var(--bad);background:rgba(239,68,68,.15);color:#FCA5A5;}
+
+  /* 配对 */
+  .pair{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:16px;}
+  .pair-col{display:flex;flex-direction:column;gap:8px;}
+  .pair-item{background:var(--card2);border:1px solid var(--line);border-radius:10px;padding:12px 14px;font-size:15px;text-align:left;color:var(--ink);width:100%;}
+  .pair-item:hover{border-color:var(--blue-l);}
+  .pair-item.sel{border:2px solid var(--warn);background:rgba(245,158,11,.15);color:var(--warn);font-weight:700;}
+  .pair-item.matched{border-color:var(--ok);background:rgba(34,197,94,.12);color:#86EFAC;cursor:default;}
+  .pair-item.wrong{border-color:var(--bad);background:rgba(239,68,68,.12);}
+
+  .exp{margin-top:16px;background:rgba(37,99,235,.1);border-left:3px solid var(--blue);
+    border-radius:0 10px 10px 0;padding:13px 16px;font-size:14.5px;color:#D7E2F5;display:none;}
+  .exp.show{display:block;}
+  .exp b{color:var(--blue-l);}
+  .nav{display:flex;justify-content:space-between;margin-top:20px;}
+  .nav button{padding:11px 26px;font-size:15px;font-weight:600;}
+  .ghost{background:transparent;border:1px solid var(--line);color:var(--ink);}
+  .prim{background:var(--blue);color:#fff;}
+  .warnbtn{background:var(--warn);color:#2B1A00;}
+  .big-score{font-size:64px;font-weight:900;color:var(--blue-l);margin:10px 0;}
+  .stat2{display:flex;gap:14px;justify-content:center;margin:22px 0;flex-wrap:wrap;}
+  .stat2 .b{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 22px;text-align:center;}
+  .stat2 .b .v{font-size:20px;font-weight:800;color:var(--blue-l);}
+  .stat2 .b .l{font-size:12px;color:var(--muted);}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+/* ===== 第一关：场景分类 ===== */
+const SCENES = [
+  {desc:"学校屋顶装 500 kW 光伏，白天自己用、余电上网，夜间用市电。",
+   opts:[
+     {t:"并网", right:true}, {t:"离网", right:false},
+     {t:"分布式", right:true}, {t:"集中式", right:false},
+     {t:"BAPV（屋顶加装板）", right:true}, {t:"BIPV（建筑一体化）", right:false},
+   ],
+   why:"学校屋顶、用户端、余电上网 → 并网+分布式+BAPV。不是集中式（集中式在沙漠戈壁），也不是BIPV（只是在屋顶加装板，不替代建筑构件）。"},
+  {desc:"青海戈壁滩建 1 GW 光伏电站，发出的电经高压输电网送到千里之外。",
+   opts:[
+     {t:"并网", right:true}, {t:"离网", right:false},
+     {t:"分布式", right:false}, {t:"集中式", right:true},
+     {t:"大型（>30MW）", right:true}, {t:"小型（≤1MW）", right:false},
+   ],
+   why:"荒漠大片建设、远距离输电、1GW 远超 30MW → 并网+集中式+大型。"},
+  {desc:"小区路边太阳能路灯：白天板给电池充电，晚上电池点亮 LED，不接电网。",
+   opts:[
+     {t:"并网", right:false}, {t:"离网", right:true},
+     {t:"有蓄电池储能", right:true}, {t:"无储能", right:false},
+     {t:"直流系统", right:true}, {t:"交流系统", right:false},
+   ],
+   why:"不接电网、自带电池、LED 用直流电 → 离网+有储能+直流系统。"},
+  {desc:"某新建大楼外立面直接用光伏玻璃幕墙代替普通玻璃，幕墙本身就是发电材料。",
+   opts:[
+     {t:"BAPV", right:false}, {t:"BIPV", right:true},
+     {t:"并网", right:true}, {t:"地面电站", right:false},
+   ],
+   why:"光伏板本身就是建筑构件（外墙）→ BIPV；BAPV 只是在屋顶/墙面额外加装板，不替代建材。"},
+  {desc:"山顶森林防火监测站，无电网覆盖，要24小时连续工作。",
+   opts:[
+     {t:"离网", right:true}, {t:"并网", right:false},
+     {t:"必须配蓄电池", right:true}, {t:"可直接上网", right:false},
+   ],
+   why:"无电网必须自己存电 → 离网+蓄电池。这也是装配游戏第一关那个场景。"},
+];
+
+/* ===== 第二关：设备配对 ===== */
+const PAIRS = [
+  {name:"防雷汇流箱", fn:"把多路组件直流汇成一路，减少到逆变器的连线"},
+  {name:"直流配电柜", fn:"二次汇流，含直流断路器、防雷器、防反二极管"},
+  {name:"并网逆变器", fn:"把直流变成与电网同频同相的交流电"},
+  {name:"交流配电柜", fn:"交流侧断路器接入电网，并计量电能"},
+  {name:"监控系统", fn:"采集电压电流等数据，远程监测电站运行"},
+  {name:"控制器", fn:"自动防止蓄电池过充和过放"},
+];
+
+let S = {level:0, idx:0, score:0, picked:new Set(), pickedLeft:null, pickedRight:null,
+         leftDone:[], rightDone:[]};
+
+const app = document.getElementById('app');
+function hud(){
+  return `<div class="hud">
+    <div class="stat"><div class="v">分类识别师</div><div class="l">课堂游戏</div></div>
+    <div class="stat"><div class="v">第 ${S.level+1} 关</div><div class="l">${S.level===0?'场景分类':'设备配对'}</div></div>
+    <div class="stat"><div class="v">${S.score}</div><div class="l">得分</div></div>
+  </div>`;
+}
+function renderHome(){
+  app.innerHTML = `<div class="center">
+    <span class="tag">任务2.3 光伏发电系统介绍</span>
+    <h1>光伏系统<span class="hi">分类与识别</span></h1>
+    <p>第一关：给真实场景选出它属于哪类光伏系统；第二关：把设备和它的作用配对。两关共约 15 分钟。</p>
+    <div class="rules"><b>玩法</b>：第一关多选分类标签，选完提交；第二关先点左侧设备，再点右侧对应作用。<br>
+      <b>评分</b>：每选对一个分类/配对成功 +10 分，选错 −5 分。</div>
+    <button class="big" onclick="start()">开始挑战</button>
+  </div>`;
+}
+function start(){ S.level=0; S.idx=0; S.score=0; render(); }
+
+function render(){
+  if(S.level===0) return renderScene();
+  if(S.level===1) return renderPair();
+  return renderEnd();
+}
+
+function renderScene(){
+  const s = SCENES[S.idx];
+  const opts = s.opts.map((o,i)=>{
+    let cls='opt';
+    if(S.picked.has(i)) cls+=' picked';
+    if(S.submitted){ cls += (o.right?' right':' wrong'); }
+    return `<button class="${cls}" onclick="pickOpt(${i})" ${S.submitted?'disabled':''}>${o.t}</button>`;
+  }).join("");
+  app.innerHTML = hud() + `
+    <div class="scene"><span class="tag">场景 ${S.idx+1}/${SCENES.length}</span>
+      <h2>${s.desc}</h2>
+      <div class="opts">${opts}</div>
+      <div class="exp" id="exp"></div>
+      <div class="nav">
+        <button class="ghost" onclick="S.picked=new Set();render()">清空选择</button>
+        ${S.submitted?`<button class="prim" onclick="nextScene()">${S.idx===SCENES.length-1?'进入第二关':'下一场景'}</button>`
+                     :`<button class="warnbtn" onclick="submitScene()">提交选择</button>`}
+      </div>
+    </div>`;
+}
+function pickOpt(i){
+  if(S.picked.has(i)) S.picked.delete(i); else S.picked.add(i);
+  render();
+}
+function submitScene(){
+  S.submitted = true;
+  let right=0;
+  SCENES[S.idx].opts.forEach((o,i)=>{
+    if(o.right && S.picked.has(i)) right++;
+    if(!o.right && S.picked.has(i)) S.score-=5;
+  });
+  S.score += right*10;
+  render();
+  const exp=document.getElementById('exp');
+  exp.innerHTML=`<b>解析：</b>${SCENES[S.idx].why}`;
+  exp.classList.add('show');
+}
+function nextScene(){
+  S.submitted=false; S.picked=new Set();
+  if(S.idx<SCENES.length-1){S.idx++;render();}
+  else{S.level=1; S.idx=0; render();}
+}
+
+function shuffle(arr){ return arr.map(v=>[Math.random(),v]).sort((a,b)=>a[0]-b[0]).map(x=>x[1]); }
+
+function renderPair(){
+  if(!S.shuffledRight){ S.shuffledRight = shuffle(PAIRS.map((p,i)=>i)); }
+  const left = PAIRS.map((p,i)=>{
+    let cls='pair-item';
+    if(S.leftDone.includes(i)) cls+=' matched';
+    else if(S.pickedLeft===i) cls+=' sel';
+    return `<button class="${cls}" onclick="pickLeft(${i})" ${S.leftDone.includes(i)?'disabled':''}>${p.name}</button>`;
+  }).join("");
+  const right = S.shuffledRight.map(ri=>{
+    const p=PAIRS[ri];
+    let cls='pair-item';
+    if(S.rightDone.includes(ri)) cls+=' matched';
+    else if(S.pickedRight===ri) cls+=' sel';
+    return `<button class="${cls}" onclick="pickRight(${ri})" ${S.rightDone.includes(ri)?'disabled':''}>${p.fn}</button>`;
+  }).join("");
+  app.innerHTML = hud() + `
+    <div class="scene"><span class="tag">设备配对　已配对 ${S.leftDone.length}/${PAIRS.length}</span>
+      <h2>把左侧设备和右侧作用连起来</h2>
+      <p>先点一个设备，再点对应的作用。配对成功变绿，点错两边都红。</p>
+      <div class="pair"><div class="pair-col">${left}</div><div class="pair-col">${right}</div></div>
+      <div class="exp" id="exp"></div>
+      <div class="nav">
+        <button class="ghost" onclick="S.shuffledRight=null;render()">重来本关</button>
+        ${S.leftDone.length===PAIRS.length?`<button class="prim" onclick="S.level=2;render()">查看成绩</button>`:""}
+      </div>
+    </div>`;
+}
+function pickLeft(i){
+  if(S.leftDone.includes(i)) return;
+  S.pickedLeft = (S.pickedLeft===i?null:i);
+  if(S.pickedLeft!==null && S.pickedRight!==null) doPair();
+  else render();
+}
+function pickRight(i){
+  if(S.rightDone.includes(i)) return;
+  S.pickedRight = (S.pickedRight===i?null:i);
+  if(S.pickedLeft!==null && S.pickedRight!==null) doPair();
+  else render();
+}
+function doPair(){
+  if(S.pickedLeft===S.pickedRight){
+    S.score+=10; S.leftDone.push(S.pickedLeft); S.rightDone.push(S.pickedRight);
+  } else {
+    S.score-=5;
+    const exp=document.getElementById('exp');
+    exp.innerHTML=`<b>不对：</b>${PAIRS[S.pickedLeft].name} —— ${PAIRS[S.pickedLeft].fn}`;
+    exp.classList.add('show');
+  }
+  S.pickedLeft=null; S.pickedRight=null;
+  render();
+}
+
+function renderEnd(){
+  const g = S.score>=80?'优秀：已经能分清各类光伏系统和主要设备':S.score>=55?'良好：基本掌握分类框架':'继续加油：重点回顾 BAPV/BIPV、集中/分布式';
+  app.innerHTML = `<div class="center">
+    <span class="tag">完成</span>
+    <h1>你的成绩</h1>
+    <div class="big-score">${S.score} 分</div>
+    <p style="font-size:18px;color:var(--warn)">${g}</p>
+    <div class="stat2">
+      <div class="b"><div class="v">离网</div><div class="l">无电网，自己存电</div></div>
+      <div class="b"><div class="v">并网</div><div class="l">接公共电网</div></div>
+      <div class="b"><div class="v">BAPV</div><div class="l">加装板</div></div>
+      <div class="b"><div class="v">BIPV</div><div class="l">建筑一体化</div></div>
+    </div>
+    <button class="big" onclick="start()">再玩一次</button>
+  </div>`;
+}
+renderHome();
+</script>
+</body>
+</html>

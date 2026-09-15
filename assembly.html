@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>光伏系统装配师 · 课堂游戏</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%230D1326'/><text x='50' y='68' font-size='44' text-anchor='middle' fill='%23F59E0B' font-family='Arial' font-weight='bold'>PV</text></svg>">
+<style>
+  :root{
+    --bg:#0D1326; --card:#151D33; --card2:#1B2440; --line:#2A3656;
+    --blue:#2563EB; --blue-l:#60A5FA; --ink:#F2F4F8; --muted:#94A3B8;
+    --ok:#22C55E; --bad:#EF4444; --warn:#F59E0B;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{background:radial-gradient(1100px 650px at 75% -10%, #1B2A55 0%, var(--bg) 55%);
+    color:var(--ink); min-height:100vh;
+    font-family:"Microsoft YaHei","PingFang SC","Noto Sans SC",system-ui,sans-serif;}
+  #app{max-width:1100px; margin:0 auto; padding:24px 20px 60px;}
+  button{font-family:inherit; cursor:pointer; border:none; border-radius:10px; transition:.15s;}
+  .tag{display:inline-block; font-size:12px; letter-spacing:.14em; color:var(--blue-l);
+    border:1px solid var(--line); padding:3px 12px; border-radius:999px;}
+
+  .hud{display:flex; justify-content:space-between; align-items:center; margin-bottom:18px;
+    background:var(--card); border:1px solid var(--line); border-radius:14px; padding:12px 18px;}
+  .hud .stat{text-align:center;}
+  .hud .stat .v{font-size:22px; font-weight:800; color:var(--blue-l);}
+  .hud .stat .l{font-size:11px; color:var(--muted); letter-spacing:.1em;}
+
+  .center{text-align:center; padding-top:6vh;}
+  .center h1{font-size:42px; margin:16px 0 10px;}
+  .center h1 .hi{color:var(--warn);}
+  .center p{color:var(--muted); font-size:16px; max-width:620px; margin:0 auto;}
+  .rules{margin:26px auto 0; max-width:600px; text-align:left;
+    background:var(--card); border:1px solid var(--line); border-radius:14px; padding:18px 22px; font-size:14px; color:var(--muted);}
+  .rules b{color:var(--ink);}
+  .big{margin-top:26px; background:var(--warn); color:#2B1A00; font-size:19px; font-weight:700; padding:13px 42px;}
+
+  .scene{background:var(--card); border:1px solid var(--line); border-radius:16px; padding:20px 24px; margin-bottom:16px;}
+  .scene h2{font-size:20px; margin-bottom:6px;}
+  .scene p{color:var(--muted); font-size:14.5px;}
+
+  /* 槽位区 */
+  .slots{display:flex; gap:12px; flex-wrap:wrap; margin-bottom:18px;}
+  .slot{flex:1; min-width:150px; background:rgba(255,255,255,.03);
+    border:2px dashed var(--line); border-radius:12px; padding:12px; min-height:130px;
+    display:flex; flex-direction:column;}
+  .slot.drop{border-color:var(--blue-l); background:rgba(37,99,235,.1);}
+  .slot .slabel{font-size:12px; color:var(--muted); margin-bottom:6px;}
+  .slot .slabel .step{color:var(--warn); font-weight:700;}
+  .slot .ph{flex:1; display:flex; align-items:center; justify-content:center;
+    color:#475569; font-size:13px; border:1px dotted var(--line); border-radius:8px;}
+  .slot.filled .ph{display:none;}
+  .part-card{background:var(--card2); border:1px solid var(--blue); border-radius:8px;
+    padding:10px; text-align:center;}
+  .part-card .pn{font-size:14px; font-weight:700; color:var(--ink);}
+  .part-card .pd{font-size:11px; color:var(--muted); margin-top:3px; line-height:1.4;}
+  .slot.right{border:2px solid var(--ok);}
+  .slot.right .part-card{border-color:var(--ok); background:rgba(34,197,94,.15);}
+  .slot.wrong{border:2px solid var(--bad);}
+  .slot.wrong .part-card{border-color:var(--bad); background:rgba(239,68,68,.15);}
+
+  /* 零件池 */
+  .pool-label{font-size:13px; color:var(--muted); margin:6px 0 10px; letter-spacing:.08em;}
+  .pool{display:flex; gap:10px; flex-wrap:wrap;}
+  .pchip{background:var(--card2); border:1px solid var(--line); border-radius:10px;
+    padding:10px 14px; font-size:14px; color:var(--ink); cursor:pointer;}
+  .pchip:hover{border-color:var(--blue-l);}
+  .pchip.sel{border:2px solid var(--warn); background:rgba(245,158,11,.15); color:var(--warn); font-weight:700;}
+  .pchip.used{opacity:.35; cursor:not-allowed;}
+  .pchip .pd{display:block; font-size:11px; color:var(--muted); font-weight:400; margin-top:2px;}
+
+  .exp{margin-top:16px; background:rgba(37,99,235,.1); border-left:3px solid var(--blue);
+    border-radius:0 10px 10px 0; padding:13px 16px; font-size:14.5px; color:#D7E2F5; display:none;}
+  .exp.show{display:block;}
+  .exp b{color:var(--blue-l);}
+
+  .nav{display:flex; justify-content:space-between; margin-top:20px;}
+  .nav button{padding:11px 26px; font-size:15px; font-weight:600;}
+  .ghost{background:transparent; border:1px solid var(--line); color:var(--ink);}
+  .prim{background:var(--blue); color:#fff;}
+  .warnbtn{background:var(--warn); color:#2B1A00;}
+
+  .big-score{font-size:64px; font-weight:900; color:var(--blue-l); margin:10px 0;}
+  .stat2{display:flex; gap:14px; justify-content:center; margin:22px 0; flex-wrap:wrap;}
+  .stat2 .b{background:var(--card); border:1px solid var(--line); border-radius:12px; padding:14px 26px; text-align:center;}
+  .stat2 .b .v{font-size:26px; font-weight:800;}
+  .stat2 .b .l{font-size:12px; color:var(--muted);}
+  .arrow{text-align:center; color:var(--muted); font-size:20px; align-self:center; padding:0 2px;}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+const PARTS = {
+  module:    {name:'光伏组件', desc:'光能→直流电'},
+  mount:     {name:'支架',     desc:'固定组件、调倾角'},
+  combiner:  {name:'汇流箱',   desc:'多路直流汇成一路'},
+  cabinet_dc:{name:'直流配电柜', desc:'二次汇流、防雷、断路器'},
+  controller:{name:'控制器',   desc:'管理蓄电池充放电'},
+  battery:   {name:'蓄电池',   desc:'储能，夜间/阴天供电'},
+  inverter_off:{name:'离网逆变器', desc:'直流变交流，独立形成电压'},
+  inverter_grd:{name:'并网逆变器', desc:'直流变交流、与电网同频同相'},
+  cabinet_ac:{name:'交流配电柜', desc:'交流保护、计量、并网点'},
+  load_dc:   {name:'直流负载', desc:'传感器/LED 等直流设备'},
+  load_ac:   {name:'交流负载', desc:'空调/照明等交流设备'},
+  grid:      {name:'电网',     desc:'余电并入公共电网'},
+  monitor:   {name:'监控系统', desc:'采集数据、远程监测'},
+};
+
+const LEVELS = [
+  {title:'第一关 · 离网基础（山顶监测站）',
+   scene:'山顶森林防火监测站：位置偏远，没有公共电网。监测站用交流空调和照明，需要独立供电。',
+   slots:[
+     {label:'发电环节', key:'module'},
+     {label:'直流汇流', key:'combiner'},
+     {label:'直流管理', key:'controller'},
+     {label:'储能',     key:'battery'},
+     {label:'逆变环节（独立供电）', key:'inverter_off'},
+     {label:'交流负载', key:'load_ac'},
+   ],
+   explain:'离网系统必须自己存电：组件 → 汇流 → 控制器防过充 → 蓄电池 → 离网逆变器自己产生交流电 → 供交流负载。离网用的是"离网逆变器"，不需要和谁同步。'},
+  {title:'第二关 · 集中式大型并网（沙漠1GW）',
+   scene:'青海戈壁滩建 1 GW 大型并网光伏电站：组件阵列巨大，需要二次汇流和防雷，发电经高压并入公共电网。',
+   slots:[
+     {label:'发电环节', key:'module'},
+     {label:'直流汇流', key:'combiner'},
+     {label:'直流二次汇流', key:'cabinet_dc'},
+     {label:'逆变环节', key:'inverter_grd'},
+     {label:'交流配电计量', key:'cabinet_ac'},
+     {label:'并入电网', key:'grid'},
+     {label:'远程监控', key:'monitor'},
+   ],
+   explain:'大型并网电站：组件 → 汇流箱 → 直流配电柜 → 并网逆变器（必须与电网同频同相才能并上去）→ 交流配电柜 → 电网；再加监控。大型并网不要蓄电池和控制器——电网就是储能。'},
+  {title:'第三关 · 交直流混合离网（海岛基站）',
+   scene:'远海通信基站：无电网覆盖。直流侧直接给传感器供电，交流侧要给空调供电，白天发电、电池储能。',
+   slots:[
+     {label:'发电环节', key:'module'},
+     {label:'直流汇流', key:'combiner'},
+     {label:'直流管理', key:'controller'},
+     {label:'储能',     key:'battery'},
+     {label:'直流负载（直挂母线）', key:'load_dc'},
+     {label:'逆变环节', key:'inverter_off'},
+     {label:'交流负载', key:'load_ac'},
+   ],
+   explain:'交直流混合：蓄电池出来分两路——直流负载（传感器/LED）直接挂直流母线；交流负载（空调）必须经离网逆变器。电网、监控在本题是干扰项。'},
+];
+
+let S = {level:0, score:0, placed:{}, picked:null, done:false};
+
+const app = document.getElementById('app');
+function renderHud(){
+  return `<div class="hud">
+    <div class="stat"><div class="v">光伏系统装配师</div><div class="l">课堂游戏</div></div>
+    <div class="stat"><div class="v">第 ${S.level+1} / ${LEVELS.length} 关</div><div class="l">关卡</div></div>
+    <div class="stat"><div class="v">${S.score}</div><div class="l">得分</div></div>
+  </div>`;
+}
+
+function renderHome(){
+  app.innerHTML = `<div class="center">
+    <span class="tag">新能源发电系统设计</span>
+    <h1>光伏系统<span class="hi">装配师</span></h1>
+    <p>从零件池里把部件放到正确的环节槽位，拼成完整的光伏发电系统。三关难度递增：离网基础 → 大型集中并网 → 交直流混合。</p>
+    <div class="rules">
+      <b>玩法</b>：先点下方零件（高亮选中），再点上方槽位放入；点已放零件可移除。<br>
+      <b>评分</b>：每个槽位放对 +10 分，放错 −5 分。全部放好后点"提交"判分。
+    </div>
+    <button class="big" onclick="start()">开始装配</button>
+  </div>`;
+}
+function start(){ S.level=0; S.score=0; render(); }
+
+function render(){
+  if(S.level>=LEVELS.length) return renderEnd();
+  const L = LEVELS[S.level];
+  const used = Object.values(S.placed);
+  const pool = Object.keys(PARTS).map(id=>{
+    const usedCls = used.includes(id) ? 'used' : (S.picked===id?'sel':'');
+    return `<button class="pchip ${usedCls}" ${used.includes(id)?'disabled':'onclick="pickPart(\''+id+'\')"'}>
+      ${PARTS[id].name}<span class="pd">${PARTS[id].desc}</span></button>`;
+  }).join('');
+  const slots = L.slots.map((s,i)=>{
+    const p = S.placed[i];
+    const part = p? PARTS[p] : null;
+    let cls='slot';
+    if(S.done){ cls += (p===s.key)?' right':' wrong'; }
+    else if(p) cls+=' filled';
+    return `<div class="${cls}" onclick="placeSlot(${i})">
+      <div class="slabel"><span class="step">${['①','②','③','④','⑤','⑥'][i]}</span> ${s.label}</div>
+      ${part?`<div class="part-card"><div class="pn">${part.name}</div><div class="pd">${part.desc}</div></div>`
+            :`<div class="ph">点这里放入零件</div>`}
+    </div>`;
+  }).join('<div class="arrow">→</div>');
+
+  app.innerHTML = renderHud() + `
+    <div class="scene"><span class="tag">${L.title}</span>
+      <h2>${L.scene}</h2></div>
+    <div class="slots">${slots}</div>
+    <div class="pool-label">零件池（点选后点槽位放入）</div>
+    <div class="pool">${pool}</div>
+    <div class="exp" id="exp"></div>
+    <div class="nav">
+      <button class="ghost" onclick="resetLevel()">清空本关</button>
+      ${S.done?`<button class="prim" onclick="nextLevel()">${S.level===LEVELS.length-1?'查看成绩':'下一关'}</button>`
+             :`<button class="warnbtn" onclick="submit()">提交装配方案</button>`}
+    </div>`;
+}
+function pickPart(id){ S.picked = (S.picked===id?null:id); render(); }
+function placeSlot(i){
+  if(S.done) return;
+  if(S.placed[i]){ delete S.placed[i]; render(); return; } // 再点移除
+  if(S.picked){ S.placed[i]=S.picked; S.picked=null; render(); }
+}
+function resetLevel(){ S.placed={}; S.picked=null; S.done=false; render(); }
+function submit(){
+  const L = LEVELS[S.level];
+  let correct=0;
+  L.slots.forEach((s,i)=>{ if(S.placed[i]===s.key) correct++; });
+  S.score += correct*10 - (L.slots.length-correct)*5;
+  S.done = true;
+  render();
+  const exp = document.getElementById('exp');
+  exp.innerHTML = `<b>本关说明：</b>${L.explain}　你装对了 ${correct}/${L.slots.length} 个环节。`;
+  exp.classList.add('show');
+}
+function nextLevel(){ S.level++; S.placed={}; S.picked=null; S.done=false; render(); }
+
+function renderEnd(){
+  const g = S.score>=90?'优秀：你已能独立设计两种光伏系统':S.score>=70?'良好：基本掌握系统组成':'继续加油：重点对比两关的差异';
+  app.innerHTML = `<div class="center">
+    <span class="tag">装配完成</span>
+    <h1>你的成绩</h1>
+    <div class="big-score">${S.score} 分</div>
+    <p style="font-size:18px;color:var(--warn)">${g}</p>
+    <div class="stat2">
+      <div class="b"><div class="v">离网</div><div class="l">有蓄电池和控制器</div></div>
+      <div class="b"><div class="v">并网</div><div class="l">无电池，直接上网</div></div>
+    </div>
+    <p style="color:var(--muted);max-width:600px;margin:0 auto">关键区别：离网必须自己存电（电池+控制器）；并网靠电网当"无限电池"，省掉储能环节，但要经过逆变器和配电柜才能并到公共电网。</p>
+    <div><button class="big" onclick="S.level=0;S.score=0;render()">再玩一次</button></div>
+  </div>`;
+}
+renderHome();
+</script>
+</body>
+</html>
