@@ -186,7 +186,7 @@ function render(){
     if(S.done){ cls += (p===s.key)?' right':' wrong'; }
     else if(p) cls+=' filled';
     return `<div class="${cls}" onclick="placeSlot(${i})">
-      <div class="slabel"><span class="step">${['①','②','③','④','⑤','⑥'][i]}</span> ${s.label}</div>
+      <div class="slabel"><span class="step">${['①','②','③','④','⑤','⑥','⑦','⑧'][i]||(i+1)}</span> ${s.label}</div>
       ${part?`<div class="part-card"><div class="pn">${part.name}</div><div class="pd">${part.desc}</div></div>`
             :`<div class="ph">点这里放入零件</div>`}
     </div>`;
