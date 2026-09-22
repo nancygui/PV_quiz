@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>光伏组件工艺流程 · 课堂游戏</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%230D1326'/><text x='50' y='70' font-size='40' text-anchor='middle' fill='%2360A5FA' font-family='Arial' font-weight='bold'>PV</text></svg>">
+<style>
+  :root{--bg:#0D1326;--card:#151D33;--card2:#1B2440;--line:#2A3656;--blue:#2563EB;--blue-l:#60A5FA;
+    --ink:#F2F4F8;--muted:#94A3B8;--ok:#22C55E;--bad:#EF4444;--warn:#F59E0B;}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:radial-gradient(1100px 650px at 75% -10%,#1B2A55 0%,var(--bg) 55%);
+    color:var(--ink);min-height:100vh;font-family:"Microsoft YaHei","PingFang SC","Noto Sans SC",system-ui,sans-serif;}
+  #app{max-width:1080px;margin:0 auto;padding:24px 20px 60px;}
+  button{font-family:inherit;cursor:pointer;border:none;border-radius:10px;transition:.15s;}
+  .tag{display:inline-block;font-size:12px;letter-spacing:.14em;color:var(--blue-l);
+    border:1px solid var(--line);padding:3px 12px;border-radius:999px;}
+  .hud{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;
+    background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 18px;}
+  .hud .stat{text-align:center;}
+  .hud .stat .v{font-size:22px;font-weight:800;color:var(--blue-l);}
+  .hud .stat .l{font-size:11px;color:var(--muted);letter-spacing:.1em;}
+  .center{text-align:center;padding-top:5vh;}
+  .center h1{font-size:40px;margin:16px 0 10px;}
+  .center h1 .hi{color:var(--blue-l);}
+  .center p{color:var(--muted);font-size:16px;max-width:640px;margin:0 auto;}
+  .rules{margin:24px auto 0;max-width:640px;text-align:left;background:var(--card);
+    border:1px solid var(--line);border-radius:14px;padding:16px 22px;font-size:14px;color:var(--muted);}
+  .rules b{color:var(--ink);}
+  .big{margin-top:24px;background:var(--blue);color:#fff;font-size:19px;font-weight:700;padding:13px 42px;}
+
+  .scene{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:20px 24px;margin-bottom:16px;}
+  .scene h2{font-size:19px;margin-bottom:6px;}
+  .scene p{color:var(--muted);font-size:14px;}
+
+  /* 第一关匹配 */
+  .match{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:14px;}
+  .mcol{display:flex;flex-direction:column;gap:7px;}
+  .mitem{background:var(--card2);border:1px solid var(--line);border-radius:9px;padding:9px 12px;
+    font-size:13.5px;text-align:left;color:var(--ink);width:100%;line-height:1.35;}
+  .mitem:hover{border-color:var(--blue-l);}
+  .mitem.sel{border:2px solid var(--warn);background:rgba(245,158,11,.15);color:var(--warn);font-weight:700;}
+  .mitem.hidden{display:none;}
+  .mitem.err{animation:shake .5s ease; border-color:var(--bad);background:rgba(239,68,68,.15);color:#FCA5A5;}
+  .mitem.win{border-color:var(--ok);background:rgba(34,197,94,.15);color:#86EFAC;animation:vanish .55s forwards;}
+  @keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-7px)}40%{transform:translateX(7px)}
+    60%{transform:translateX(-5px)}80%{transform:translateX(5px)}}
+  @keyframes vanish{0%{transform:scale(1);opacity:1}60%{transform:scale(1.08);opacity:1}
+    100%{transform:scale(.8);opacity:0}}
+
+  /* 第二关排序 */
+  .sort-wrap{margin-top:14px;}
+  .slots{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px;}
+  .slot{background:rgba(255,255,255,.03);border:2px dashed var(--line);border-radius:9px;
+    padding:8px;min-height:52px;display:flex;align-items:center;justify-content:center;text-align:center;
+    font-size:12.5px;color:#475569;}
+  .slot.filled{border-style:solid;border-color:var(--blue);background:rgba(37,99,235,.12);color:var(--ink);cursor:pointer;}
+  .slot .sn{color:var(--warn);font-weight:700;margin-right:4px;}
+  .slot.filled:hover{border-color:var(--bad);}
+  .pool{display:flex;flex-wrap:wrap;gap:8px;}
+  .pchip{background:var(--card2);border:1px solid var(--line);border-radius:9px;padding:9px 13px;
+    font-size:13px;color:var(--ink);}
+  .pchip:hover{border-color:var(--blue-l);}
+  .pchip.used{opacity:.3;cursor:not-allowed;}
+
+  .exp{margin-top:14px;background:rgba(37,99,235,.1);border-left:3px solid var(--blue);
+    border-radius:0 10px 10px 0;padding:12px 16px;font-size:14px;color:#D7E2F5;display:none;}
+  .exp.show{display:block;}
+  .exp b{color:var(--blue-l);}
+  .nav{display:flex;justify-content:space-between;margin-top:18px;}
+  .nav button{padding:11px 26px;font-size:15px;font-weight:600;}
+  .ghost{background:transparent;border:1px solid var(--line);color:var(--ink);}
+  .prim{background:var(--blue);color:#fff;}
+  .warnbtn{background:var(--warn);color:#2B1A00;}
+  .big-score{font-size:64px;font-weight:900;color:var(--blue-l);margin:10px 0;}
+  .toast{position:fixed;top:26px;left:50%;transform:translateX(-50%);z-index:99;
+    padding:12px 28px;border-radius:12px;font-size:20px;font-weight:800;letter-spacing:.06em;
+    opacity:0;pointer-events:none;transition:opacity .2s;}
+  .toast.show{opacity:1;}
+  .toast.ok{background:rgba(34,197,94,.18);border:1px solid var(--ok);color:#86EFAC;}
+  .toast.bad{background:rgba(239,68,68,.18);border:1px solid var(--bad);color:#FCA5A5;}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+/* 光伏组件生产工艺流程：13道工序（按PPT顺序） */
+const STEPS = [
+  {name:'电池片分选', desc:'按性能参数把电池分类，保证同组件内电池性能一致，提高输出功率'},
+  {name:'单片焊接',   desc:'将镀锡铜汇流带焊接到电池片正面主栅线上'},
+  {name:'串焊',       desc:'依次将电池片串接成电池串，注意焊接质量'},
+  {name:'叠层',       desc:'按玻璃、EVA、电池串、EVA、背板层次铺设，焊好汇流带并引出电极'},
+  {name:'中检',       desc:'层压前中间检查：用EL检测仪检查电池片隐裂、断栅、碎片等缺陷，同时检查叠层外观（错位、异物、脏污）'},
+  {name:'层压',       desc:'抽真空排出空气，加热使EVA熔化，把玻璃、电池、背板粘接成整体'},
+  {name:'切边',       desc:'切除层压后组件四周溢出的EVA和背板毛边，修整边缘整齐（也称修边）'},
+  {name:'固化',       desc:'保温使EVA充分交联固化，稳定封装性能'},
+  {name:'装框接线',   desc:'安装铝边框增加强度并密封，安装接线盒、连接导线端子'},
+  {name:'清洗',       desc:'清洁组件表面玻璃，去除灰尘与残留物'},
+  {name:'终测',       desc:'标定输出功率、测试I-V特性，高压抽检测试绝缘与耐压'},
+  {name:'终检',       desc:'外观与综合质量最终检查'},
+  {name:'包装',       desc:'装箱保护，防止运输过程损坏'},
+];
+const ORDER = STEPS.map((_,i)=>i); // 正确顺序 0..12
+
+function shuffle(arr){ return arr.map(v=>[Math.random(),v]).sort((a,b)=>a[0]-b[0]).map(x=>x[1]); }
+
+let S = {view:'home', score:0,
+  leftSel:null, rightSel:null, mDone:[], mLeftOrder:[], mRightOrder:[],
+  sPool:[], sSlots:[], sSubmitted:false};
+
+const app = document.getElementById('app');
+
+/* ===== 音效与语音 ===== */
+let audioCtx=null;
+function beep(freq,dur,when,type,vol){
+  try{
+    audioCtx=audioCtx||new (window.AudioContext||window.webkitAudioContext)();
+    const o=audioCtx.createOscillator(), g=audioCtx.createGain();
+    o.type=type||'square'; o.frequency.value=freq;
+    const t0=audioCtx.currentTime+when;
+    g.gain.setValueAtTime(0.0001,t0);
+    g.gain.exponentialRampToValueAtTime(vol||0.2,t0+0.02);
+    g.gain.exponentialRampToValueAtTime(0.0001,t0+dur);
+    o.connect(g); g.connect(audioCtx.destination);
+    o.start(t0); o.stop(t0+dur+0.05);
+  }catch(e){}
+}
+function badSound(){ beep(150,0.16,0,'square',0.22); beep(110,0.22,0.2,'square',0.22); }
+function goodVoice(){
+  // 先试朗读 Good；无论语音是否可用，都播放轻快叮咚音作为兜底
+  beep(880,0.1,0,'sine',0.14); beep(1175,0.16,0.12,'sine',0.14);
+  try{
+    if('speechSynthesis' in window){
+      speechSynthesis.cancel();
+      const u=new SpeechSynthesisUtterance('Good!');
+      u.lang='en-US'; u.rate=0.85; u.pitch=1.15; u.volume=1;
+      speechSynthesis.speak(u);
+    }
+  }catch(e){}
+}
+let toastTimer=null;
+function showToast(msg,kind){
+  let t=document.getElementById('toast');
+  if(!t){ t=document.createElement('div'); t.id='toast'; t.className='toast'; document.body.appendChild(t); }
+  t.className='toast '+kind+' show';
+  t.textContent=msg;
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>{ t.classList.remove('show'); },1100);
+}
+function hud(){
+  return `<div class="hud">
+    <div class="stat"><div class="v">工艺流程闯关</div><div class="l">光伏组件生产工艺</div></div>
+    <div class="stat"><div class="v">第 ${S.view==='match'?'1':'2'} / 2 关</div><div class="l">${S.view==='match'?'工序匹配':'流程排序'}</div></div>
+    <div class="stat"><div class="v">${S.score}</div><div class="l">得分</div></div>
+  </div>`;
+}
+function renderHome(){
+  app.innerHTML = `<div class="center">
+    <span class="tag">任务2.4 光伏组件设计与应用</span>
+    <h1>光伏组件<span class="hi">工艺流程</span>闯关</h1>
+    <p>13道工序，从一片电池到一块可上屋顶的组件。先考"每道工序干什么"，再考"先后顺序"。</p>
+    <div class="rules">
+      <b>第一关·工序匹配</b>：左侧工序 ↔ 右侧作用，点两边配对。配对成功卡片消失并听到"Good"；配对失败卡片抖动并听到低沉嘟声。<br>
+      <b>第二关·流程排序</b>：点下方工序按钮，按正确顺序依次放入13个槽位。<br>
+      <b>评分</b>：匹配/排位正确 +10 分，错误 −5 分。
+    </div>
+    <button class="big" onclick="start()">开始闯关</button>
+  </div>`;
+}
+function start(){
+  S = {view:'match', score:0, leftSel:null, rightSel:null, mDone:[],
+    mLeftOrder:shuffle(ORDER), mRightOrder:shuffle(ORDER),
+    sPool:shuffle(ORDER), sSlots:[], sSubmitted:false};
+  render();
+}
+
+/* ========== 第一关：工序-作用匹配 ========== */
+function renderMatch(){
+  const left = S.mLeftOrder.map(i=>{
+    const done = S.mDone.includes(i);
+    let cls='mitem'+(done?' hidden':(S.leftSel===i?' sel':''));
+    return `<button class="${cls}" data-li="${i}" onclick="pickLeft(${i})">${STEPS[i].name}</button>`;
+  }).join('');
+  const right = S.mRightOrder.map(j=>{
+    const done = S.mDone.includes(j);
+    let cls='mitem'+(done?' hidden':(S.rightSel===j?' sel':''));
+    return `<button class="${cls}" data-ri="${j}" onclick="pickRight(${j})">${STEPS[j].desc}</button>`;
+  }).join('');
+  app.innerHTML = hud() + `
+    <div class="scene"><span class="tag">第一关 · 工序匹配　已完成 ${S.mDone.length}/${STEPS.length}</span>
+      <h2>把工序和它的作用连起来</h2>
+      <p>两侧顺序都已打乱。先点左侧工序，再点右侧对应的作用。听声音判断对错：Good = 对，嘟 = 错。</p>
+      <div class="match">
+        <div class="mcol">${left}</div>
+        <div class="mcol">${right}</div>
+      </div>
+      <div class="exp" id="exp"></div>
+      <div class="nav">
+        <button class="ghost" onclick="S.mRightOrder=shuffle(ORDER);S.leftSel=S.rightSel=null;render()">重排右侧</button>
+        ${S.mDone.length===STEPS.length?`<button class="prim" onclick="toSort()">进入第二关 →</button>`:''}
+      </div>
+    </div>`;
+}
+function pickLeft(i){
+  if(S.mDone.includes(i)) return;
+  S.leftSel=(S.leftSel===i?null:i);
+  if(S.leftSel!==null && S.rightSel!==null){ render(); tryMatch(); }
+  else render();
+}
+function pickRight(j){
+  if(S.mDone.includes(j)) return;
+  S.rightSel=(S.rightSel===j?null:j);
+  if(S.leftSel!==null && S.rightSel!==null){ render(); tryMatch(); }
+  else render();
+}
+function tryMatch(){
+  const l=S.leftSel, r=S.rightSel;
+  S.leftSel=S.rightSel=null;
+  const lb=document.querySelector(`.mcol:first-child [data-li="${l}"]`);
+  const rb=document.querySelector(`.mcol:last-child [data-ri="${r}"]`);
+  if(l===r){
+    S.score+=10; S.mDone.push(l);
+    goodVoice(); showToast('+10 配对成功', 'ok');
+    if(lb) lb.classList.add('win');
+    if(rb) rb.classList.add('win');
+    setTimeout(()=>render(), 600);
+  } else {
+    S.score-=5;
+    badSound(); showToast('-5 再试试', 'bad');
+    if(lb) lb.classList.add('err');
+    if(rb) rb.classList.add('err');
+    setTimeout(()=>{
+      render();
+      const exp=document.getElementById('exp');
+      exp.innerHTML=`<b>不匹配：</b>「${STEPS[l].name}」对应的是「${STEPS[l].desc}」`;
+      exp.classList.add('show');
+    }, 700);
+  }
+}
+
+/* ========== 第二关：流程排序 ========== */
+function toSort(){
+  S.view='sort'; S.sSubmitted=false; S.sPool=shuffle(ORDER); S.sSlots=[]; render();
+}
+function renderSort(){
+  const slots = Array.from({length:STEPS.length},(_,i)=>{
+    const p=S.sSlots[i];
+    if(p===undefined){
+      return `<div class="slot"><span class="sn">${i+1}</span>空</div>`;
+    }
+    return `<div class="slot filled" onclick="removeSlot(${i})"><span class="sn">${i+1}</span>${STEPS[p].name}</div>`;
+  }).join('');
+  const pool = S.sPool.map(i=>{
+    return `<button class="pchip" onclick="addSlot(${i})">${STEPS[i].name}</button>`;
+  }).join('');
+  app.innerHTML = hud() + `
+    <div class="scene"><span class="tag">第二关 · 流程排序　已排 ${S.sSlots.length}/${STEPS.length}</span>
+      <h2>按正确顺序排出13道工序</h2>
+      <p>依次点击下方工序放入槽位（点已放入的槽可取出重排）。生产顺序不能乱——错一步，前面的活白干。</p>
+      <div class="sort-wrap">
+        <div class="slots">${slots}</div>
+        <div class="pool">${pool}</div>
+      </div>
+      <div class="exp" id="exp"></div>
+      <div class="nav">
+        <button class="ghost" onclick="S.sPool=shuffle(ORDER);S.sSlots=[];S.sSubmitted=false;render()">清空重排</button>
+        ${S.sSlots.length===STEPS.length && !S.sSubmitted
+          ?`<button class="warnbtn" onclick="submitSort()">提交排序</button>`
+          :(S.sSubmitted?`<button class="prim" onclick="S.view='end';render()">查看成绩</button>`:'')}
+      </div>
+    </div>`;
+}
+function addSlot(i){
+  if(S.sSubmitted) return;
+  if(S.sSlots.includes(i)) return;
+  const idx = S.sSlots.indexOf(undefined);
+  if(idx>=0){ S.sSlots[idx]=i; } else { S.sSlots.push(i); }
+  S.sPool=S.sPool.filter(x=>x!==i);
+  render();
+}
+function removeSlot(i){
+  if(S.sSubmitted) return;
+  const p=S.sSlots[i];
+  if(p===undefined) return;
+  S.sSlots[i]=undefined;
+  S.sPool.push(p);
+  render();
+}
+function submitSort(){
+  S.sSubmitted=true;
+  let right=0;
+  S.sSlots.forEach((p,i)=>{ if(p===ORDER[i]) right++; else S.score-=5; });
+  S.score += right*10;
+  render();
+  const exp=document.getElementById('exp');
+  exp.innerHTML=`<b>正确 ${right}/${STEPS.length} 位。</b>正确顺序：${STEPS.map(s=>s.name).join(' → ')}`;
+  exp.classList.add('show');
+}
+
+/* ========== 结束页 ========== */
+function renderEnd(){
+  const total = STEPS.length*20; // 两关满分260
+  const g = S.score>=220?'优秀：已完整掌握组件生产流程'
+           :S.score>=165?'良好：主要工序都记住了'
+           :S.score>=110?'及格：流程大体清楚，再顺一遍更稳'
+           :'继续加油：先背熟13道工序的顺序和各自作用';
+  app.innerHTML = `<div class="center">
+    <span class="tag">闯关完成</span>
+    <h1>你的成绩</h1>
+    <div class="big-score">${S.score} 分 <span style="font-size:22px;color:var(--muted)">/ ${total}</span></div>
+    <p style="font-size:18px;color:var(--warn)">${g}</p>
+    <div class="rules" style="max-width:640px;margin-top:18px">
+      <b>13道工序速记口诀：</b>分选 → 单片焊 → 串焊 → 叠层 → 中检 → 层压 → 切边 → 固化 → 装框接线 → 清洗 → 终测 → 终检 → 包装<br>
+      <b>记忆主线：</b>先把"材料准备好"（分选/焊接/串焊），再"叠层压合"（叠层/中检/层压/切边/固化），最后"成件检测"（装框/清洗/终测/终检/包装）。
+    </div>
+    <button class="big" onclick="start()">再闯一次</button>
+  </div>`;
+}
+
+function render(){
+  if(S.view==='home') return renderHome();
+  if(S.view==='match') return renderMatch();
+  if(S.view==='sort') return renderSort();
+  if(S.view==='end') return renderEnd();
+}
+renderHome();
+</script>
+</body>
+</html>
